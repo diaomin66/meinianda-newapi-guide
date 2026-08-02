@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Meinianda AI 新用户使用、充值与模型 API 对接文档">
+  <title>Meinianda AI · 开发者文档</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg:#0a0d12; --panel:#11161e; --panel-2:#151c26; --soft:#0e131b;
+      --ink:#f0f4f8; --muted:#9ba8b8; --faint:#687587; --line:rgba(206,219,235,.13);
+      --blue:#79a9ff; --blue-2:#b3cdfd; --blue-soft:rgba(90,151,255,.12);
+      --green:#75dca9; --amber:#ffc574; --red:#ff9a9a;
+      --sans:"Public Sans","Noto Sans SC",sans-serif; --serif:"Lora","Noto Serif SC",serif;
+      --mono:"Roboto Mono",ui-monospace,monospace; --header:64px; --left:246px; --right:205px;
+    }
+    [data-theme="light"] {
+      color-scheme:light; --bg:#f7f9fc; --panel:#fff; --panel-2:#f4f7fb; --soft:#eff3f8;
+      --ink:#101827; --muted:#5c6879; --faint:#7d8897; --line:rgba(22,35,54,.13);
+      --blue:#286fd7; --blue-2:#175bbd; --blue-soft:rgba(40,111,215,.1);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:92px}
+    body{min-width:320px;margin:0;color:var(--ink);background:
+      radial-gradient(circle at 76% -12%,rgba(79,134,234,.16),transparent 30rem),
+      radial-gradient(circle at -8% 23%,rgba(79,134,234,.08),transparent 25rem),var(--bg);
+      font:14px/1.65 var(--sans);-webkit-font-smoothing:antialiased}
+    body:before{position:fixed;z-index:-1;inset:0;content:"";pointer-events:none;opacity:.36;
+      background-image:linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.014) 1px,transparent 1px);background-size:34px 34px}
+    a{color:inherit;text-decoration:none} button,input{font:inherit} button{cursor:pointer}
+    code,pre{font-family:var(--mono)}
+    .skip{position:fixed;z-index:100;top:-42px;left:16px;padding:8px 12px;border-radius:8px;color:#fff;background:var(--blue)}
+    .skip:focus{top:16px}
+    header{position:sticky;z-index:30;top:0;height:var(--header);border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(18px)}
+    .head-inner{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;max-width:1600px;height:100%;margin:auto;padding:0 21px}
+    .brand{display:inline-flex;align-items:center;gap:9px;width:max-content;font-weight:800;letter-spacing:-.03em}
+    .mark{position:relative;display:grid;width:28px;height:28px;place-items:center;overflow:hidden;border:1px solid rgba(179,205,253,.45);border-radius:9px;background:linear-gradient(135deg,#1e416e,#78a8ff);box-shadow:0 8px 21px rgba(74,133,240,.22)}
+    .mark:before,.mark:after{position:absolute;width:8px;height:8px;border:1.5px solid #fff;border-radius:2px;content:"";transform:rotate(45deg)}
+    .mark:before{translate:-4px -4px;opacity:.7}.mark:after{translate:4px 4px}
+    .sub{color:var(--faint);font-size:11px;font-weight:600}
+    .topnav{display:flex;gap:3px;color:var(--muted);font-size:12px;font-weight:700}
+    .topnav a{padding:7px 9px;border-radius:8px}.topnav a:hover{color:var(--ink);background:var(--panel-2)}
+    .actions{display:flex;justify-content:flex-end;gap:8px}.icon,.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:9px;font-size:12px;font-weight:700;transition:.16s ease}
+    .icon{width:33px;height:33px;border:1px solid var(--line);color:var(--muted);background:var(--panel)}
+    .icon:hover{color:var(--ink);background:var(--panel-2)}.btn{min-height:37px;padding:0 12px;border:1px solid rgba(179,205,253,.46);color:#fff;background:#3d7bd5;box-shadow:0 8px 19px rgba(47,111,215,.2)}
+    .btn:hover{background:#4d89df;transform:translateY(-1px)}.btn.soft{border-color:var(--line);color:var(--ink);background:var(--panel);box-shadow:none}.btn.soft:hover{border-color:rgba(121,169,255,.52);background:var(--blue-soft)}
+    .layout{display:grid;grid-template-columns:var(--left) minmax(0,1fr) var(--right);max-width:1600px;min-height:calc(100vh - var(--header));margin:auto}
+    .sidebar{position:sticky;top:var(--header);height:calc(100vh - var(--header));padding:26px 16px 28px 20px;overflow:auto;border-right:1px solid var(--line)}
+    .nav-title{display:flex;align-items:center;justify-content:space-between;margin:0 4px 13px;color:var(--faint);font-size:10px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
+    .dot{width:7px;height:7px;border-radius:99px;background:var(--green);box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 12%,transparent)}
+    .group{margin-bottom:18px}.group>span{display:block;margin:0 4px 4px;color:var(--faint);font-size:10px;font-weight:700}
+    .sidenav{display:grid;gap:2px}.sidenav a{display:flex;gap:8px;align-items:center;padding:7px 8px;border:1px solid transparent;border-radius:8px;color:var(--muted);font-size:12px;font-weight:600}
+    .sidenav a:before{width:18px;color:var(--faint);font:9px var(--mono);content:attr(data-n)}.sidenav a:hover,.sidenav a.active{border-color:color-mix(in srgb,var(--blue) 25%,transparent);color:var(--ink);background:var(--blue-soft)}
+    .sidenav a.active:before{color:var(--blue-2)}.mini-card{margin:26px 4px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,var(--panel),color-mix(in srgb,var(--blue-soft) 58%,var(--panel)))}
+    .mini-card strong{font-size:11px}.mini-card p{margin:4px 0 9px;color:var(--muted);font-size:10px;line-height:1.55}.mini-card a{color:var(--blue-2);font-size:10px;font-weight:700}
+    main{min-width:0;padding:0 clamp(24px,4.4vw,80px) 76px}.article{width:min(100%,815px);margin:auto}
+    .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.7fr);align-items:center;gap:36px;min-height:420px;padding:62px 0 48px;border-bottom:1px solid var(--line)}
+    .eyebrow{display:flex;align-items:center;gap:7px;margin-bottom:15px;color:var(--blue-2);font:600 10px var(--mono);letter-spacing:.04em}.eyebrow:before{width:21px;height:1px;background:currentColor;content:""}
+    h1,h2,h3,p{margin-top:0}h1{max-width:590px;margin-bottom:16px;font-size:clamp(35px,5vw,59px);font-weight:800;line-height:1.07;letter-spacing:-.06em}h1 em{color:var(--blue-2);font-family:var(--serif);font-weight:500}
+    .hero p{max-width:540px;margin-bottom:23px;color:var(--muted);font-size:14px;line-height:1.76}.hero-actions{display:flex;flex-wrap:wrap;gap:9px}
+    .terminal{position:relative;padding:1px;overflow:hidden;border-radius:15px;background:linear-gradient(135deg,rgba(179,205,253,.5),rgba(255,255,255,.04));box-shadow:0 18px 50px rgba(0,0,0,.23)}
+    .term-inner{position:relative;padding:15px 16px 17px;border-radius:14px;background:#10141c}.term-top{display:flex;justify-content:space-between;margin-bottom:13px}.balls{display:flex;gap:5px}.balls i{display:block;width:7px;height:7px;border-radius:50%;background:#78869a}.balls i:nth-child(1){background:#eb7777}.balls i:nth-child(2){background:#dbb161}.balls i:nth-child(3){background:#79c99d}.term-top span{color:#95a2b6;font:10px var(--mono)}
+    .terminal pre{min-height:185px;margin:0;overflow:auto;color:#e6edf7;font-size:10px;line-height:1.75;white-space:pre-wrap}.b{color:#8cb7ff}.g{color:#8be0b8}.d{color:#8e9bac}
+    section{padding-top:66px}.heading{display:flex;align-items:baseline;gap:11px;margin-bottom:10px}.number{color:var(--blue);font:700 11px var(--mono)}h2{margin:0;font-size:26px;letter-spacing:-.04em}h3{margin-bottom:6px;font-size:14px;letter-spacing:-.02em}.lead{max-width:700px;margin-bottom:22px;color:var(--muted);font-size:13px}
+    .steps{display:grid;gap:9px}.step{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:12px;min-height:78px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--panel) 93%,transparent);transition:.16s ease}.step:hover{border-color:color-mix(in srgb,var(--blue) 40%,transparent);background:var(--panel-2);transform:translateX(2px)}
+    .step-no{display:grid;width:30px;height:30px;place-items:center;border:1px solid color-mix(in srgb,var(--blue) 38%,transparent);border-radius:9px;color:var(--blue-2);background:var(--blue-soft);font:700 10px var(--mono)}.step p{margin:2px 0 0;color:var(--muted);font-size:11px;line-height:1.5}.step a{color:var(--blue-2);font-size:11px;font-weight:700;white-space:nowrap}.step a:after{margin-left:4px;content:"→"}
+    .notice{display:flex;gap:11px;margin:18px 0 2px;padding:12px 13px;border:1px solid color-mix(in srgb,var(--blue) 27%,transparent);border-radius:11px;color:var(--muted);background:color-mix(in srgb,var(--blue-soft) 68%,var(--panel));font-size:11px;line-height:1.6}.notice i{display:grid;flex:0 0 18px;width:18px;height:18px;place-items:center;border:1px solid currentColor;border-radius:50%;color:var(--blue-2);font-family:var(--serif);font-style:italic}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:11px}.metric{min-width:0;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.metric label{display:block;margin-bottom:7px;color:var(--faint);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.metric strong{display:block;overflow:hidden;font:600 17px var(--mono);text-overflow:ellipsis;white-space:nowrap}.metric small{display:block;margin-top:5px;color:var(--muted);font-size:9px;line-height:1.45}
+    .billing{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(240px,.92fr);gap:10px}.box{padding:17px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}.formula{margin:13px 0 10px;overflow:auto;color:var(--blue-2);font:11px/1.8 var(--mono);white-space:nowrap}.fine{margin:0;color:var(--muted);font-size:10px;line-height:1.65}.calc label{display:block;margin-bottom:7px;color:var(--muted);font-size:10px;font-weight:700}.calc-row{display:flex;gap:7px}.calc input,.search{min-width:0;outline:0;border:1px solid var(--line);border-radius:9px;color:var(--ink);background:var(--soft)}.calc input{width:100%;height:37px;padding:0 10px;font-family:var(--mono)}.calc .btn{min-height:37px;color:var(--ink);background:var(--panel);box-shadow:none}.result{margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}.result span{display:block;color:var(--faint);font-size:9px;font-weight:700}.result strong{display:block;margin-top:2px;color:var(--green);font:600 22px var(--mono);letter-spacing:-.05em}.result small{color:var(--muted);font-size:9px}
+    .basics{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:10px}.basic,.endpoint{padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--panel)}.basic span{display:block;margin-bottom:5px;color:var(--faint);font-size:9px;font-weight:700}.basic code{display:block;overflow:auto;color:var(--blue-2);font-size:10px;white-space:nowrap}.endpoints{display:grid;gap:9px}.endpoint{display:grid;grid-template-columns:31px minmax(0,1fr);gap:11px}.endpoint b{display:grid;width:30px;height:30px;place-items:center;border:1px solid var(--line);border-radius:9px;color:var(--blue-2);background:var(--blue-soft);font:700 10px var(--mono)}.endpoint p{margin:2px 0 0;color:var(--muted);font-size:10px}.endpoint code{color:var(--blue-2);font-size:10px}
+    .code-panel{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:13px;background:#0f141c}.tabs{display:flex;gap:3px;min-height:45px;padding:6px 8px;overflow:auto;border-bottom:1px solid rgba(206,219,235,.11)}.tab{padding:6px 8px;border:0;border-radius:7px;color:#90a0b4;background:transparent;font:10px var(--mono);white-space:nowrap}.tab:hover,.tab.active{color:#eaf1fb;background:rgba(121,169,255,.14)}.code{min-height:230px;margin:0;padding:17px 53px 17px 17px;overflow:auto;color:#e4ebf4;font-size:10px;line-height:1.72;white-space:pre}.copy{position:absolute;top:11px;right:12px;height:27px;padding:0 8px;border:1px solid rgba(206,219,235,.17);border-radius:7px;color:#adb9c9;background:rgba(255,255,255,.04);font-size:9px}.copy:hover{color:#fff;border-color:rgba(179,205,253,.45);background:rgba(121,169,255,.18)}
+    .protocols{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.protocol{min-height:154px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);transition:.16s ease}.protocol:hover{border-color:color-mix(in srgb,var(--blue) 40%,transparent);transform:translateY(-2px)}.protocol-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.tag,.pill{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:99px;font:600 9px var(--mono);line-height:1}.tag{height:21px;padding:0 7px;color:var(--blue-2);border-color:color-mix(in srgb,var(--blue) 35%,transparent);background:var(--blue-soft)}.protocol p{margin:9px 0 10px;color:var(--muted);font-size:10px;line-height:1.57}.protocol code{display:block;overflow:auto;color:var(--blue-2);font-size:9px;white-space:nowrap}
+    .tools{display:flex;flex-wrap:wrap;gap:7px;margin:20px 0 11px}.search-wrap{position:relative;flex:1 1 210px}.search-wrap:before{position:absolute;z-index:1;top:8px;left:10px;color:var(--faint);font-size:13px;content:"⌕"}.search{width:100%;height:36px;padding:0 10px 0 30px}.filters{display:flex;flex-wrap:wrap;gap:4px}.pill{height:28px;padding:0 8px;color:var(--muted);background:var(--panel);transition:.15s ease}.pill:hover,.pill.active{color:var(--blue-2);border-color:color-mix(in srgb,var(--blue) 40%,transparent);background:var(--blue-soft)}
+    .catalog-status{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px;color:var(--faint);font-size:10px}.catalog-status b{color:var(--muted);font:600 9px var(--mono)}.models{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.model{display:flex;flex-direction:column;min-height:159px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);transition:.16s ease}.model:hover{border-color:color-mix(in srgb,var(--blue) 47%,transparent);background:var(--panel-2);transform:translateY(-2px)}.model-head{display:flex;justify-content:space-between;gap:7px}.model-name{overflow-wrap:anywhere;font:600 10px/1.5 var(--mono)}.ratio{flex:0 0 auto;color:var(--amber);font:9px var(--mono)}.model-tags{display:flex;flex-wrap:wrap;gap:4px;margin:11px 0 8px}.model-tags .tag{height:19px;color:var(--muted);background:var(--soft)}.model-tags [data-p="anthropic"]{color:#e0b5ff;border-color:rgba(224,181,255,.28)}.model-tags [data-p="gemini"]{color:#8fcbff;border-color:rgba(143,203,255,.27)}.model-tags [data-p="image-generation"]{color:#ffc58c;border-color:rgba(255,197,140,.27)}.model-tags [data-p="videos"]{color:#f0a8dc;border-color:rgba(240,168,220,.27)}.meta{margin:0;color:var(--faint);font-size:9px;line-height:1.55}.model-foot{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:auto;padding-top:11px}.route{overflow:hidden;color:var(--blue-2);font:9px var(--mono);text-overflow:ellipsis;white-space:nowrap}.open{padding:0;border:0;color:var(--muted);background:transparent;font-size:9px;font-weight:700;white-space:nowrap}.open:hover{color:var(--blue-2)}.empty{grid-column:1/-1;padding:27px 15px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);text-align:center}
+    details{border:1px solid var(--line);border-radius:11px;background:var(--panel)}details+details{margin-top:8px}summary{padding:13px;color:var(--ink);font-size:12px;font-weight:700;cursor:pointer}details p{margin:0;padding:0 13px 13px;color:var(--muted);font-size:11px}.footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);color:var(--faint);font-size:10px}.footer a{color:var(--blue-2)}
+    .toc{position:sticky;top:91px;align-self:start;max-height:calc(100vh - 110px);margin:27px 17px 0 0;padding-left:16px;overflow:auto;border-left:1px solid var(--line)}.toc b{display:block;margin-bottom:8px;color:var(--faint);font-size:9px;letter-spacing:.1em}.toc a{display:block;padding:5px 0;color:var(--faint);font-size:10px}.toc a.sublink{padding-left:10px;font-size:9px}.toc a:hover,.toc a.active{color:var(--blue-2)}
+    .mobile{display:none}.backdrop{position:fixed;z-index:80;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,5,8,.68);backdrop-filter:blur(8px)}.backdrop.show{display:flex}.modal{width:min(100%,700px);max-height:calc(100vh - 36px);overflow:auto;border:1px solid var(--line);border-radius:15px;background:var(--panel);box-shadow:0 28px 80px rgba(0,0,0,.45)}.modal-head{display:flex;justify-content:space-between;gap:15px;padding:17px;border-bottom:1px solid var(--line)}.modal-head small{color:var(--faint);font:9px var(--mono)}.modal-head h2{margin-top:3px;overflow-wrap:anywhere;font:14px var(--mono)}.close{width:30px;height:30px;border:1px solid var(--line);border-radius:8px;color:var(--muted);background:transparent}.close:hover{color:var(--ink);background:var(--panel-2)}.modal-body{padding:15px 17px 18px}.modal-note{margin:0 0 11px;color:var(--muted);font-size:10px}.toast{position:fixed;z-index:100;right:17px;bottom:17px;padding:10px 12px;border:1px solid rgba(117,220,169,.37);border-radius:9px;color:#ecfff6;background:#153d2e;box-shadow:0 15px 40px rgba(0,0,0,.2);font-size:11px;opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s}.toast.show{opacity:1;transform:none}
+    @media(max-width:1170px){.layout{grid-template-columns:var(--left) minmax(0,1fr)}.toc{display:none}}
+    @media(max-width:850px){.head-inner{grid-template-columns:1fr auto;padding:0 14px}.topnav,.sub,.actions>.btn{display:none}.mobile{display:inline-flex}.layout{display:block}.sidebar{position:fixed;z-index:50;left:0;top:var(--header);width:min(285px,calc(100vw - 35px));height:calc(100vh - var(--header));background:var(--panel);box-shadow:20px 0 45px rgba(0,0,0,.22);transform:translateX(-105%);transition:.18s}.sidebar.show{transform:none}main{padding:0 20px 64px}.hero{grid-template-columns:1fr;gap:25px;min-height:0;padding:45px 0 38px}.terminal{max-width:520px}.metrics,.billing,.protocols{grid-template-columns:1fr}}
+    @media(max-width:550px){h1{font-size:37px;overflow-wrap:anywhere}.hero{overflow:hidden}.hero>*{min-width:0}.hero p{overflow-wrap:anywhere}.hero-actions{display:grid;grid-template-columns:1fr}.hero-actions>*{width:100%;min-width:0}.terminal{width:100%;max-width:100%}.terminal pre{overflow-wrap:anywhere}.term-top span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}section{padding-top:51px}h2{font-size:23px}.step{grid-template-columns:32px minmax(0,1fr)}.step a{grid-column:2}.models,.basics{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#content">跳到正文</a>
+  <header>
+    <div class="head-inner">
+      <a class="brand" href="#top"><span class="mark" aria-hidden="true"></span><span>Meinianda AI</span><span class="sub">/ Developer Docs</span></a>
+      <nav class="topnav"><a href="#start">开始使用</a><a href="#billing">充值与计费</a><a href="#integration">API 接入</a><a href="#models">模型对接</a></nav>
+      <div class="actions"><button class="icon mobile" id="mobile-menu" type="button" aria-label="打开目录" aria-expanded="false">☰</button><button class="icon" id="theme" type="button" aria-label="切换亮暗主题">◐</button><a class="btn" href="https://meinianda.top/sign-in" target="_blank" rel="noreferrer">登录控制台 ↗</a></div>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="文档目录">
+      <div class="nav-title">文档目录 <i class="dot" title="站内部署后可同步实时数据"></i></div>
+      <div class="group"><span>开始</span><nav class="sidenav"><a href="#start" data-n="01">新用户流程</a><a href="#first-call" data-n="02">首次调用</a></nav></div>
+      <div class="group"><span>账户与额度</span><nav class="sidenav"><a href="#billing" data-n="03">充值比例</a><a href="#keys" data-n="04">创建 API Key</a></nav></div>
+      <div class="group"><span>开发接入</span><nav class="sidenav"><a href="#integration" data-n="05">OpenAI 兼容</a><a href="#protocols" data-n="06">协议对接</a><a href="#models" data-n="07">每个模型</a></nav></div>
+      <div class="group"><span>帮助</span><nav class="sidenav"><a href="#faq" data-n="08">常见问题</a></nav></div>
+      <div class="mini-card"><strong>实时模型目录</strong><p>GitHub Pages 每次构建时会同步站内 Pricing 数据快照。</p><a href="#models">查看目录 →</a></div>
+    </aside>
+    <main id="content">
+      <article class="article">
+        <section class="hero" id="top">
+          <div>
+            <div class="eyebrow">MEINIANDA AI / QUICKSTART</div>
+            <h1>从注册到首次调用，<em>只需五分钟。</em></h1>
+            <p>这份文档覆盖新用户完整路径、充值与到账口径、API Key 创建，以及 OpenAI、Claude、Gemini、图像、视频和向量模型的对接方式。</p>
+            <div class="hero-actions"><a class="btn" href="#start">开始使用 ↓</a><a class="btn soft" href="#models">浏览全部模型 →</a></div>
+          </div>
+          <div class="terminal" aria-label="OpenAI 兼容调用示例"><div class="term-inner">
+            <div class="term-top"><div class="balls"><i></i><i></i><i></i></div><span>first-request.sh</span></div>
+            <pre><span class="b">curl</span> https://meinianda.top/v1/chat/completions \
+  <span class="g">-H</span> "Authorization: Bearer $API_KEY" \
+  <span class="g">-H</span> "Content-Type: application/json" \
+  <span class="g">-d</span> '{
+    <span class="d">"model"</span>: <span class="g">"MODEL_ID"</span>,
+    <span class="d">"messages"</span>: [{
+      <span class="d">"role"</span>: <span class="g">"user"</span>,
+      <span class="d">"content"</span>: <span class="g">"你好"</span>
+    }]
+  }'</pre>
+          </div></div>
+        </section>
+
+        <section id="start">
+          <div class="heading"><span class="number">01</span><h2>新用户完整使用流程</h2></div>
+          <p class="lead">按顺序完成即可。模型可用范围由账户分组决定，先充值、再选模型，能减少首次接入中的权限与余额问题。</p>
+          <div class="steps">
+            <article class="step"><span class="step-no">01</span><div><h3>注册账户</h3><p>访问注册页，设置用户名和密码；完成后进入控制台登录。</p></div><a href="https://meinianda.top/sign-up" target="_blank" rel="noreferrer">注册</a></article>
+            <article class="step"><span class="step-no">02</span><div><h3>打开 Wallet 并充值或兑换</h3><p>在 Wallet 选择当时显示的支付方式；若有兑换码，也在此处完成兑换。</p></div><a href="https://meinianda.top/wallet/" target="_blank" rel="noreferrer">去钱包</a></article>
+            <article class="step"><span class="step-no">03</span><div><h3>创建 API Key</h3><p>在 Keys 中新建密钥，复制一次并写入服务端环境变量。密钥泄露时立即删除重建。</p></div><a href="https://meinianda.top/keys/" target="_blank" rel="noreferrer">创建 Key</a></article>
+            <article class="step"><span class="step-no">04</span><div><h3>从 Pricing 选择模型</h3><p>检查模型名称、分组、倍率和支持协议；不要只凭模型名称猜接口类型。</p></div><a href="#models">选模型</a></article>
+            <article class="step"><span class="step-no">05</span><div><h3>发送首个请求并看日志</h3><p>用模型卡给出的协议模板测试；成功后到用量日志核对模型、消耗与返回结果。</p></div><a href="#first-call">测试</a></article>
+          </div>
+          <div class="notice"><i>i</i><div><strong>安全边界：</strong>API Key 等同于账户调用权限。仅存放在服务端环境变量或密钥管理器中，不要写入前端、截图、浏览器扩展配置或公开仓库。</div></div>
+        </section>
+
+        <section id="billing">
+          <div class="heading"><span class="number">02</span><h2>充值比例与到账说明</h2></div>
+          <p class="lead">充值比例和支付方式会由站内配置调整。本页展示基础计算口径；付款前，以 Wallet 最终订单页显示的应付金额为准。</p>
+          <div class="metrics">
+            <div class="metric"><label>基础支付系数</label><strong id="price">0.90</strong><small>来自 status.price</small></div>
+            <div class="metric"><label>额度显示方式</label><strong id="quota-type">USD</strong><small>来自 quota_display_type</small></div>
+            <div class="metric"><label>内部额度单位</label><strong id="quota-unit">500,000</strong><small>每 1 显示额度对应 quota</small></div>
+          </div>
+          <div class="billing">
+            <article class="box"><h3>基础充值公式</h3><div class="formula">基础应付 = 充值显示额度 × 基础支付系数</div><p class="fine">基础系数 0.90 表示充值 1.00 显示额度对应基础应付 0.90。到账内部额度为“充值显示额度 × 500,000 quota”。若 Wallet 显示账户规则、最低充值额或活动优惠，最终订单金额以该页为准。</p></article>
+            <article class="box calc"><h3>基础应付试算</h3><label for="amount">输入充值显示额度</label><div class="calc-row"><input id="amount" type="number" value="10" min="0" step="0.01" inputmode="decimal"><button class="btn soft" id="calculate" type="button">试算</button></div><div class="result"><span>基础应付（未计入组倍率/活动）</span><strong id="money">0.00</strong><small id="quota-result">到账内部额度：0 quota</small></div></article>
+          </div>
+          <div class="notice"><i>i</i><div><strong>不要误标为某种支付币种：</strong>公开配置给出的是支付系数与显示额度，不足以确认实际结算币种；因此本页仅说明比例与公式，不把 0.90 写成某个法定货币金额。</div></div>
+        </section>
+
+        <section id="keys">
+          <div class="heading"><span class="number">03</span><h2>创建 API Key 与 Base URL</h2></div>
+          <p class="lead">所有调用都需要一枚在 Keys 页面创建的密钥。将 Base URL 与 Key 交给对应 SDK；模型名称由 Pricing 目录决定。</p>
+          <div class="basics">
+            <div class="basic"><span>OpenAI / Responses / Image / Video</span><code>https://meinianda.top/v1</code></div>
+            <div class="basic"><span>Claude Messages</span><code>https://meinianda.top/v1</code></div>
+            <div class="basic"><span>Gemini 原生协议</span><code>https://meinianda.top/v1beta</code></div>
+            <div class="basic"><span>验证可用模型</span><code>GET /v1/models</code></div>
+          </div>
+          <div class="endpoints">
+            <article class="endpoint"><b>A</b><div><h3>Authorization Bearer</h3><code>Authorization: Bearer sk-...</code><p>适用于 OpenAI 兼容、Responses、图像、视频、Embedding、Rerank 等端点。</p></div></article>
+            <article class="endpoint"><b>C</b><div><h3>Claude Headers</h3><code>x-api-key: sk-... · anthropic-version: 2023-06-01</code><p>仅在模型卡标有 anthropic 协议时使用。</p></div></article>
+            <article class="endpoint"><b>G</b><div><h3>Gemini Key</h3><code>x-goog-api-key: sk-...</code><p>仅在模型卡标有 gemini 协议时使用，也可按 Gemini SDK 的 key 方式配置。</p></div></article>
+          </div>
+        </section>
+
+        <section id="integration">
+          <div class="heading"><span class="number">04</span><h2>OpenAI 兼容接入</h2></div>
+          <p class="lead">大部分文本模型可使用 OpenAI SDK。将 MODEL_ID 换成 Pricing 中实际可用的模型名称；密钥只应在服务端读取。</p>
+          <div class="code-panel" id="sdk-panel"><div class="tabs"><button class="tab active" type="button" data-sdk="curl">cURL</button><button class="tab" type="button" data-sdk="python">Python</button><button class="tab" type="button" data-sdk="node">Node.js</button></div><pre class="code" id="sdk-code"></pre><button class="copy" type="button" data-copy="sdk-code">复制</button></div>
+          <div class="notice" id="first-call"><i>✓</i><div><strong>首个请求的验收标准：</strong>HTTP 200、返回里包含你选定的 model、用量日志出现该次请求。若返回模型不可用，请先在 /v1/models 或 Pricing 中确认账户分组是否具备该模型。</div></div>
+        </section>
+
+        <section id="protocols">
+          <div class="heading"><span class="number">05</span><h2>按协议选择对接方式</h2></div>
+          <p class="lead">“OpenAI 兼容”不等于所有模型都请求 chat/completions。模型卡会标出协议，下面是各协议应使用的路由。</p>
+          <div class="protocols">
+            <article class="protocol"><div class="protocol-top"><h3>文本 / 推理</h3><span class="tag">openai</span></div><p>常规对话、推理、工具调用模型优先使用 OpenAI Chat Completions。</p><code>POST /v1/chat/completions</code></article>
+            <article class="protocol"><div class="protocol-top"><h3>Responses</h3><span class="tag">responses</span></div><p>仅限模型卡包含 Responses 标签的模型；compact 是独立路由。</p><code>POST /v1/responses</code><code>POST /v1/responses/compact</code></article>
+            <article class="protocol"><div class="protocol-top"><h3>Claude Messages</h3><span class="tag">anthropic</span></div><p>Claude 原生协议使用 Messages 请求体与 Anthropic 认证头。</p><code>POST /v1/messages</code></article>
+            <article class="protocol"><div class="protocol-top"><h3>Gemini 原生</h3><span class="tag">gemini</span></div><p>Gemini 原生模型按 Generate Content 路径调用。</p><code>POST /v1beta/models/{model}:generateContent</code></article>
+            <article class="protocol"><div class="protocol-top"><h3>向量 / 重排</h3><span class="tag">openai</span></div><p>Embedding 与 Reranker 虽可能标为 OpenAI 兼容，但都有专用业务端点。</p><code>POST /v1/embeddings</code><code>POST /v1/rerank</code></article>
+            <article class="protocol"><div class="protocol-top"><h3>图像 / 视频</h3><span class="tag">media</span></div><p>只对模型卡标为图像或视频的模型使用；视频模型可能处于测试或异步返回状态。</p><code>POST /v1/images/generations</code><code>POST /v1/videos</code></article>
+          </div>
+        </section>
+
+        <section id="models">
+          <div class="heading"><span class="number">06</span><h2>每个模型的对接方式</h2></div>
+          <p class="lead">每张卡显示模型 ID、可用协议、推荐路由和实时倍率。点击“查看调用”可得到已替换模型名的 cURL 示例；多协议模型可以在弹窗内切换协议。</p>
+          <div class="notice"><i>↻</i><div><strong>数据刷新：</strong><span id="source-text">本地预览展示内置参考目录；GitHub Pages 构建时会生成站内 Pricing 的同源数据快照。</span></div></div>
+          <div class="tools"><label class="search-wrap"><input class="search" id="search" type="search" aria-label="搜索模型" placeholder="搜索模型，例如 claude / embedding / gpt"></label><div class="filters" id="filters"></div></div>
+          <div class="catalog-status" aria-live="polite"><span id="count">正在载入模型目录…</span><b id="state">REFERENCE</b></div>
+          <div class="models" id="model-grid"></div>
+        </section>
+
+        <section id="faq">
+          <div class="heading"><span class="number">07</span><h2>常见问题与排错</h2></div>
+          <details><summary>为什么返回“模型不可用”或找不到模型？</summary><p>先检查模型 ID 是否完全一致，再用 GET /v1/models 查询当前 Key 实际可用的列表。若模型在 Pricing 中存在但 Key 看不到，通常是分组、余额或模型状态发生变化。</p></details>
+          <details><summary>充值后没有立即到账怎么办？</summary><p>先保留支付订单信息，在 Wallet 的充值记录中查看状态。不要重复支付；最终以 Wallet 订单、到账记录和平台支持渠道的核验结果为准。</p></details>
+          <details><summary>模型倍率和充值比例是一回事吗？</summary><p>不是。充值比例决定购买显示额度时的基础应付公式；模型倍率决定具体调用时的消耗计算。模型卡显示的是后者，支付页显示的是前者。</p></details>
+          <details><summary>能把 API Key 放到网页、移动端或浏览器插件里吗？</summary><p>不建议。任何能被最终用户查看或提取的前端环境都可能泄露 Key。请用自有后端代理请求，或为不同环境创建可随时撤销的独立 Key。</p></details>
+        </section>
+        <footer class="footer">本页按站内公开配置与 NewAPI 兼容路由整理。模型、倍率、支付方式与活动规则会变动，始终以 <a href="https://meinianda.top/pricing" target="_blank" rel="noreferrer">Pricing</a> 与登录后的 <a href="https://meinianda.top/wallet/" target="_blank" rel="noreferrer">Wallet</a> 实时显示为准。</footer>
+      </article>
+    </main>
+    <aside class="toc" aria-label="本页目录"><b>ON THIS PAGE</b><a href="#start">新用户流程</a><a class="sublink" href="#billing">充值与到账</a><a class="sublink" href="#keys">API Key</a><a href="#integration">OpenAI 兼容</a><a href="#protocols">协议对接</a><a href="#models">每个模型</a><a href="#faq">常见问题</a></aside>
+  </div>
+  <div class="backdrop" id="backdrop" aria-hidden="true"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-head"><div><small>MODEL INTEGRATION</small><h2 id="modal-title">模型调用</h2></div><button class="close" id="close" type="button" aria-label="关闭">×</button></div><div class="modal-body" id="modal-body"></div></section></div>
+  <div class="toast" id="toast" role="status">已复制到剪贴板</div>
+  <script type="text/plain" id="legacy-reference-script">
+    (function(){
+      "use strict";
+      var root="https://meinianda.top";
+      var sameOrigin=window.location.origin===root;
+      var status={price:0.9,quota_per_unit:500000,quota_display_type:"USD"};
+      var seed=[
+        ["BAAI/bge-m3",["openai"]],["claude-fable-5",["anthropic"]],["claude-haiku-4-5-20251001",["anthropic","openai"]],["claude-opus-4-6",["anthropic"]],["claude-opus-4-7",["anthropic"]],["claude-opus-4-8",["anthropic"]],["claude-opus-5",["anthropic","openai"]],["claude-sonnet-4-6",["anthropic"]],["claude-sonnet-5",["anthropic","openai"]],
+        ["deepseek-v4-flash",["openai"]],["deepseek-v4-pro",["openai"]],["gemini-2.5-flash",["openai"]],["gemini-2.5-flash-image",["gemini","openai"]],["gemini-2.5-flash-image-preview",["gemini","openai"]],["gemini-2.5-flash-lite",["openai"]],["gemini-2.5-flash-nothinking",["openai"]],["gemini-2.5-pro",["openai"]],["gemini-3-flash",["openai"]],["gemini-3-flash-preview",["openai"]],["gemini-3-pro-image",["gemini"]],["gemini-3-pro-image-preview",["gemini","openai"]],["gemini-3-pro-image-preview-business",["gemini"]],["gemini-3-pro-preview",["openai"]],["gemini-3.1-flash-image",["gemini"]],["gemini-3.1-flash-image-preview",["gemini","openai"]],["gemini-3.1-flash-image-preview-business",["gemini"]],["gemini-3.1-flash-lite",["openai"]],["gemini-3.1-flash-lite-preview",["openai"]],["gemini-3.1-pro-preview",["openai"]],["gemini-3.5-flash",["openai"]],["gemini-3.6-flash",["openai"]],
+        ["glm-5.1",["openai"]],["glm-5.2",["openai"]],["gpt-5.4",["openai","openai-response","openai-response-compact"]],["gpt-5.4-mini",["openai"]],["gpt-5.5",["openai","openai-response","openai-response-compact"]],["gpt-5.6-luna",["openai"]],["gpt-5.6-sol",["openai"]],["gpt-5.6-terra",["openai"]],["gpt-image-2",["image-generation"]],["gpt-image-2-c",["openai"]],["gemini-omni-flash",["videos"]],["video-2.0-pro",["videos"]],
+        ["grok-3-mini",["openai"]],["grok-3-mini-fast",["openai"]],["grok-4.20-0309-non-reasoning",["openai"]],["grok-4.20-0309-reasoning",["openai"]],["grok-4.20-multi-agent-0309",["openai"]],["grok-4.3",["openai"]],["grok-4.5",["openai"]],["grok-build-0.1",["openai"]],["grok-composer-2.5-fast",["openai"]],["kimi-k2.5",["openai"]],["kimi-k2.6",["openai"]],["kimi-k2.7-code",["openai"]],["kimi-k3",["openai"]],["nai-diffusion-4-5-full",["openai"]],
+        ["qwen3-embedding-0.6b",["openai"]],["qwen3-embedding-4b",["openai"]],["qwen3-embedding-8b",["openai"]],["qwen3-reranker-0.6b",["openai"]],["qwen3-reranker-4b",["openai"]],["qwen3-reranker-8b",["openai"]],["qwen3-vl-embedding-8b",["openai"]],["qwen3-vl-reranker-8b",["openai"]],["qwen3.6-plus",["openai"]],["qwen3.7-max",["openai"]],["qwen3.7-plus",["openai"]],["text-embedding-ada-002",["openai"]],["text-embedding-3-large",["openai"]],["text-embedding-3-small",["openai"]]
+      ].map(function(x){return{model_name:x[0],supported_endpoint_types:x[1],enable_groups:[],model_ratio:null};});
+      var models=seed.slice(),filter="all",modalModel=null,timer;
+      var labels={openai:"OpenAI","openai-response":"Responses","openai-response-compact":"Responses Compact",anthropic:"Anthropic",gemini:"Gemini","image-generation":"Image",videos:"Video"};
+      var order=["openai","openai-response","openai-response-compact","anthropic","gemini","image-generation","videos"];
+      var sdk={
+        curl:"curl https://meinianda.top/v1/chat/completions \\\\\n  -H \\"Authorization: Bearer $MEINIANDA_API_KEY\\" \\\\\n  -H \\"Content-Type: application/json\\" \\\\\n  -d '{\\n    \\"model\\": \\"MODEL_ID\\",\\n    \\"messages\\": [{\\"role\\": \\"user\\", \\"content\\": \\"你好\\"}]\\n  }'",
+        python:"from openai import OpenAI\\nimport os\\n\\nclient = OpenAI(\\n    base_url=\\"https://meinianda.top/v1\\",\\n    api_key=os.environ[\\"MEINIANDA_API_KEY\\"],\\n)\\n\\nresponse = client.chat.completions.create(\\n    model=\\"MODEL_ID\\",\\n    messages=[{\\"role\\": \\"user\\", \\"content\\": \\"你好\\"}],\\n)\\nprint(response.choices[0].message.content)",
+        node:"import OpenAI from \\"openai\\";\\n\\nconst client = new OpenAI({\\n  baseURL: \\"https://meinianda.top/v1\\",\\n  apiKey: process.env.MEINIANDA_API_KEY,\\n});\\n\\nconst response = await client.chat.completions.create({\\n  model: \\"MODEL_ID\\",\\n  messages: [{ role: \\"user\\", content: \\"你好\\" }],\\n});\\nconsole.log(response.choices[0].message.content);"
+      };
+      function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+      function n(v){var x=Number(v);return Number.isFinite(x)?x.toLocaleString("en-US",{maximumFractionDigits:6}):"—"}
+      function protocols(m){return order.filter(function(k){return(m.supported_endpoint_types||[]).indexOf(k)!==-1})}
+      function route(m,p){var name=String(m.model_name).toLowerCase();if(p==="anthropic")return"/v1/messages";if(p==="gemini")return"/v1beta/models/"+m.model_name+":generateContent";if(p==="image-generation")return"/v1/images/generations";if(p==="videos")return"/v1/videos";if(p==="openai-response")return"/v1/responses";if(p==="openai-response-compact")return"/v1/responses/compact";if(name.indexOf("embedding")!==-1||name==="baai/bge-m3")return"/v1/embeddings";if(name.indexOf("rerank")!==-1)return"/v1/rerank";if(name.indexOf("image")!==-1||name.indexOf("diffusion")!==-1)return"/v1/images/generations";return"/v1/chat/completions"}
+      function primary(m){var ps=protocols(m),name=String(m.model_name).toLowerCase();if(ps.indexOf("videos")!==-1)return"videos";if(ps.indexOf("image-generation")!==-1)return"image-generation";if(name.indexOf("embedding")!==-1||name.indexOf("rerank")!==-1)return"openai";if(name.indexOf("claude")!==-1&&ps.indexOf("anthropic")!==-1)return"anthropic";if(ps.indexOf("gemini")!==-1&&ps.indexOf("openai")===-1)return"gemini";return ps.indexOf("openai")!==-1?"openai":ps[0]||"openai"}
+      function purpose(m){var z=String(m.model_name).toLowerCase(),p=protocols(m);if(p.indexOf("videos")!==-1)return"视频生成";if(p.indexOf("image-generation")!==-1||z.indexOf("image")!==-1||z.indexOf("diffusion")!==-1)return"图像生成";if(z.indexOf("embedding")!==-1||z==="baai/bge-m3")return"Embedding 向量";if(z.indexOf("rerank")!==-1)return"Rerank 重排";if(p.indexOf("anthropic")!==-1)return"Claude 文本 / Agent";if(p.indexOf("gemini")!==-1)return"Gemini 原生";return"文本 / 推理"}
+      function setMetrics(){document.getElementById("price").textContent=Number(status.price).toFixed(2);document.getElementById("quota-type").textContent=status.quota_display_type||"—";document.getElementById("quota-unit").textContent=n(status.quota_per_unit);calculate()}
+      function calculate(){var a=Number(document.getElementById("amount").value)||0,price=Number(status.price)||0,unit=Number(status.quota_per_unit)||0;document.getElementById("money").textContent=(a*price).toFixed(2);document.getElementById("quota-result").textContent="到账内部额度："+n(a*unit)+" quota"}
+      function filtered(){var q=document.getElementById("search").value.trim().toLowerCase();return models.filter(function(m){var ps=protocols(m),txt=[m.model_name,m.description||"",(m.enable_groups||[]).join(" "),ps.join(" ")].join(" ").toLowerCase();return(filter==="all"||ps.indexOf(filter)!==-1)&&(!q||txt.indexOf(q)!==-1)})}
+      function renderFilters(){var available={};models.forEach(function(m){protocols(m).forEach(function(p){available[p]=true})});var items=["all"].concat(order.filter(function(p){return available[p]}));document.getElementById("filters").innerHTML=items.map(function(p){return'<button class="pill '+(filter===p?"active":"")+'" type="button" data-filter="'+esc(p)+'">'+esc(p==="all"?"全部":labels[p])+"</button>"}).join("")}
+      function renderModels(){var list=filtered(),host=document.getElementById("model-grid");document.getElementById("count").textContent="显示 "+list.length+" / "+models.length+" 个模型";if(!list.length){host.innerHTML='<div class="empty">没有匹配的模型。试试删除关键词，或切换协议筛选。</div>';return}host.innerHTML=list.map(function(m,i){var ps=protocols(m),main=primary(m),group=(m.enable_groups||[]).filter(Boolean),ratio=Number(m.model_ratio),tags=ps.map(function(p){return'<span class="tag" data-p="'+esc(p)+'">'+esc(labels[p]||p)+"</span>"}).join(""),meta=purpose(m)+(group.length?" · "+group.slice(0,2).join(" / "):"");return'<article class="model"><div class="model-head"><div class="model-name">'+esc(m.model_name)+'</div><span class="ratio">'+(Number.isFinite(ratio)?ratio+"×":"实时倍率")+'</span></div><div class="model-tags">'+tags+'</div><p class="meta">'+esc(meta)+'</p><div class="model-foot"><code class="route">'+esc(route(m,main))+'</code><button class="open" type="button" data-index="'+i+'">查看调用 →</button></div></article>'}).join("");Array.prototype.forEach.call(host.querySelectorAll("[data-index]"),function(b){b.addEventListener("click",function(){openModel(list[Number(b.getAttribute("data-index"))])})})}
+      function codeFor(m,p){var r=route(m,p),name=m.model_name,head='curl '+root+r+' \\\\\n  -H "Authorization: Bearer $MEINIANDA_API_KEY" \\\\\n  -H "Content-Type: application/json" \\\\\n  -d ';if(p==="anthropic")return'curl '+root+r+' \\\\\n  -H "x-api-key: $MEINIANDA_API_KEY" \\\\\n  -H "anthropic-version: 2023-06-01" \\\\\n  -H "content-type: application/json" \\\\\n  -d \'{\\n    "model": "'+name+'",\\n    "max_tokens": 1024,\\n    "messages": [{"role":"user","content":"你好"}]\\n  }\'';if(p==="gemini")return'curl '+root+r+' \\\\\n  -H "x-goog-api-key: $MEINIANDA_API_KEY" \\\\\n  -H "content-type: application/json" \\\\\n  -d \'{\\n    "contents": [{"parts":[{"text":"你好"}]]\\n  }\'';if(p==="openai-response"||p==="openai-response-compact")return head+'\\'{\\n    "model": "'+name+'",\\n    "input": "你好"\\n  }\\'';if(p==="image-generation"||r==="/v1/images/generations")return head+'\\'{\\n    "model": "'+name+'",\\n    "prompt": "一座晨雾中的未来城市"\\n  }\\'';if(p==="videos")return head+'\\'{\\n    "model": "'+name+'",\\n    "prompt": "海边日落的电影感短片"\\n  }\\'';if(r==="/v1/embeddings")return head+'\\'{\\n    "model": "'+name+'",\\n    "input": "待向量化的文本"\\n  }\\'';if(r==="/v1/rerank")return head+'\\'{\\n    "model": "'+name+'",\\n    "query": "用户问题",\\n    "documents": ["候选文档 A","候选文档 B"]\\n  }\\'';return head+'\\'{\\n    "model": "'+name+'",\\n    "messages": [{"role":"user","content":"你好"}]\\n  }\''}
+      function renderModal(m,p){var ps=protocols(m),cur=ps.indexOf(p)!==-1?p:primary(m),groups=(m.enable_groups||[]).filter(Boolean),note="推荐路由："+route(m,cur)+"。"+(groups.length?" 可用分组："+groups.join(" / ")+"。":"")+" 请使用当前 Key 在 /v1/models 或 Pricing 中确认可用性。";document.getElementById("modal-body").innerHTML='<p class="modal-note">'+esc(note)+'</p><div class="code-panel"><div class="tabs">'+ps.map(function(x){return'<button class="tab '+(x===cur?"active":"")+'" type="button" data-modal="'+esc(x)+'">'+esc(labels[x]||x)+"</button>"}).join("")+'</div><pre class="code" id="modal-code"></pre><button class="copy" type="button" data-copy="modal-code">复制</button></div>';document.getElementById("modal-code").textContent=codeFor(m,cur);Array.prototype.forEach.call(document.querySelectorAll("[data-modal]"),function(b){b.addEventListener("click",function(){renderModal(m,b.getAttribute("data-modal"))})});bindCopy(document.getElementById("modal-body"))}
+      function openModel(m){if(!m)return;modalModel=m;document.getElementById("modal-title").textContent=m.model_name;renderModal(m,primary(m));document.getElementById("backdrop").classList.add("show");document.getElementById("backdrop").setAttribute("aria-hidden","false");document.body.style.overflow="hidden";document.getElementById("close").focus()}
+      function closeModal(){document.getElementById("backdrop").classList.remove("show");document.getElementById("backdrop").setAttribute("aria-hidden","true");document.body.style.overflow="";modalModel=null}
+      function showToast(x){var t=document.getElementById("toast");t.textContent=x||"已复制到剪贴板";t.classList.add("show");clearTimeout(timer);timer=setTimeout(function(){t.classList.remove("show")},1800)}
+      function copy(text){if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(text).then(function(){showToast()}).catch(function(){fallback(text)})}else fallback(text)}
+      function fallback(text){var t=document.createElement("textarea");t.value=text;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();try{document.execCommand("copy");showToast()}catch(e){showToast("复制失败，请手动复制")}document.body.removeChild(t)}
+      function bindCopy(host){Array.prototype.forEach.call(host.querySelectorAll("[data-copy]"),function(b){b.addEventListener("click",function(){var x=document.getElementById(b.getAttribute("data-copy"));if(x)copy(x.textContent)})})}
+      function get(path){return fetch(root+path,{headers:{Accept:"application/json"}}).then(function(r){if(!r.ok)throw Error("HTTP "+r.status);return r.json()})}
+      function live(){if(!sameOrigin){document.getElementById("source-text").textContent="本地预览展示内置参考目录；发布至 meinianda.top 后会从 /api/pricing 自动刷新模型、分组、倍率与协议。";return}Promise.all([get("/api/status"),get("/api/pricing")]).then(function(v){var s=v[0]&&v[0].data?v[0].data:{},p=v[1]||{};status={price:s.price,quota_per_unit:s.quota_per_unit,quota_display_type:s.quota_display_type};setMetrics();if(Array.isArray(p.data)&&p.data.length){models=p.data.slice().sort(function(a,b){return String(a.model_name).localeCompare(String(b.model_name))});renderFilters();renderModels()}document.getElementById("source-text").textContent="已从站内 /api/pricing 自动同步。价格、模型、倍率、分组与支付方式仍以控制台实时显示为准。";document.getElementById("state").textContent="LIVE"}).catch(function(){document.getElementById("source-text").textContent="实时目录暂不可读取，当前展示内置参考目录。请以 Pricing / Wallet 实时显示为准。";document.getElementById("state").textContent="FALLBACK"})}
+      function observe(){if(!("IntersectionObserver" in window))return;var links=Array.prototype.slice.call(document.querySelectorAll(".sidenav a,.toc a"));var sections=Array.prototype.slice.call(document.querySelectorAll("main section[id]"));var ob=new IntersectionObserver(function(entries){entries.forEach(function(e){if(!e.isIntersecting)return;links.forEach(function(a){a.classList.toggle("active",a.getAttribute("href")==="#"+e.target.id)})})},{rootMargin:"-20% 0px -68% 0px"});sections.forEach(function(x){ob.observe(x)})}
+      function init(){try{var th=localStorage.getItem("meinianda-docs-theme");if(th)document.documentElement.setAttribute("data-theme",th)}catch(e){}document.getElementById("sdk-code").textContent=sdk.curl;setMetrics();renderFilters();renderModels();bindCopy(document);document.getElementById("calculate").addEventListener("click",calculate);document.getElementById("amount").addEventListener("input",calculate);document.getElementById("search").addEventListener("input",renderModels);document.getElementById("filters").addEventListener("click",function(e){var b=e.target.closest("[data-filter]");if(!b)return;filter=b.getAttribute("data-filter");renderFilters();renderModels()});document.getElementById("sdk-panel").addEventListener("click",function(e){var b=e.target.closest("[data-sdk]");if(!b)return;Array.prototype.forEach.call(this.querySelectorAll("[data-sdk]"),function(x){x.classList.toggle("active",x===b)});document.getElementById("sdk-code").textContent=sdk[b.getAttribute("data-sdk")]});document.getElementById("close").addEventListener("click",closeModal);document.getElementById("backdrop").addEventListener("click",function(e){if(e.target===this)closeModal()});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&modalModel)closeModal()});document.getElementById("theme").addEventListener("click",function(){var x=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",x);try{localStorage.setItem("meinianda-docs-theme",x)}catch(e){}});document.getElementById("mobile-menu").addEventListener("click",function(){var s=document.getElementById("sidebar"),yes=!s.classList.contains("show");s.classList.toggle("show",yes);this.setAttribute("aria-expanded",String(yes))});Array.prototype.forEach.call(document.querySelectorAll(".sidenav a"),function(a){a.addEventListener("click",function(){document.getElementById("sidebar").classList.remove("show");document.getElementById("mobile-menu").setAttribute("aria-expanded","false")})});observe();live()}
+      init();
+    })();
+  </script>
+  <script src="./app.js"></script>
+</body>
+</html>
