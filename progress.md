@@ -25,3 +25,24 @@
 - README.md、docs/meinianda-newapi-guide.md、.gitignore：仓库入口、维护说明和临时/生成文件排除规则。
 - progress.md：本轮施工、验证与落点记录。
 - Rollback: initial publishing commit 后执行 git revert HEAD，然后再次推送 main。
+
+## 2026-08-02 - Task: Publish Meinianda AI documentation to GitHub Pages
+
+### What was done
+
+- 创建公开仓库 diaomin66/meinianda-newapi-guide，默认分支为 main。
+- 启用 GitHub Actions 型 Pages，并将文档站与实时数据快照发布到公开 Pages 地址。
+- 确认页面和 data/live.json 均已通过公网访问。
+
+### Testing
+
+- GitHub Actions run 30726071932：build 与 deploy 两个作业均成功。
+- 公网主页返回 HTTP 200，标题为 Meinianda AI 开发者文档。
+- 公网 data/live.json 返回 HTTP 200，包含 71 个 model_name、pricing 数据与 price 0.9。
+
+### Notes
+
+- GitHub repository：diaomin66/meinianda-newapi-guide，保存源码、Pages 工作流和维护文档。
+- GitHub Pages：由 .github/workflows/pages.yml 部署，并在每次推送与每日计划任务时刷新公开模型快照。
+- progress.md：追加实际仓库与 Pages 发布验证结果。
+- Rollback: git revert bf9912b 然后 git push origin main，可撤销初始文档站交付。
